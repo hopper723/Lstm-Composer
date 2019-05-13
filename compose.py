@@ -7,6 +7,9 @@ from keras.layers import Dropout
 from keras.layers import LSTM
 from keras.layers import Activation
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 def prepare_sequences(notes, note_names, n_vocab):
     """ Prepare the sequences used by the Neural Network """
     # map between notes and integers and back
@@ -49,7 +52,7 @@ def restore_model(network_input, n_vocab):
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
 
     # Load the weights to each node
-    model.load_weights('weights.hdf5')
+    model.load_weights('models/weights.hdf5')
 
     return model
 
@@ -112,14 +115,13 @@ def create_midi(encoded_notes):
 
     midi_stream = stream.Stream(output_notes)
 
-    midi_stream.write('midi', fp='test_output.mid')
+    midi_stream.write('midi', fp='generated_music/test_output.mid')
 
 def generate():
     """ Generate a piano midi file """
     #load the notes used to train the model
     with open('data/notes', 'rb') as filepath:
         notes = pickle.load(filepath)
-        notes = notes[:len(notes)//5]
 
     # Get all pitch names
     note_names = sorted(set(item for item in notes))

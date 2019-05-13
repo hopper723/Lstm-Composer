@@ -8,12 +8,20 @@ def get_notes():
     """
     notes = []
 
-    for file in glob.glob("maestro/*.midi"):
+    for file in glob.glob("midi_songs/*.mid"):
         midi = converter.parse(file)
 
         print("Parsing %s" % file)
 
-        for el in midi.flat.notes:
+        notes_to_parse = None
+
+        try: # file has instrument parts
+            s2 = instrument.partitionByInstrument(midi)
+            notes_to_parse = s2.parts[0].recurse()
+        except: # file has notes in a flat structure
+            notes_to_parse = midi.flat.notes
+
+        for el in notes_to_parse:
             if isinstance(el, note.Note):
                 notes.append(str(el.pitch))
             elif isinstance(el, chord.Chord):

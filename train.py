@@ -10,30 +10,17 @@ from keras.layers import Activation
 from keras.utils import np_utils
 from keras.callbacks import ModelCheckpoint
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 def get_notes():
     """
     Get all the notes and chords from the midi files in the ./maestro directory
     """
     notes = []
 
-    for file in glob.glob("maestro/*.midi"):
-        midi = converter.parse(file)
-
-        print("Parsing %s" % file)
-
-        for el in midi.flat.notes:
-            if isinstance(el, note.Note):
-                notes.append(str(el.pitch))
-            elif isinstance(el, chord.Chord):
-                """
-                append every chord by encoding the id of every note in the
-                chord together into a single string, with each note being
-                separated by a dot
-                """
-                notes.append('.'.join(str(n) for n in el.normalOrder))
-
-    with open('data/notes', 'wb') as filepath:
-        pickle.dump(notes, filepath)
+    with open('data/notes', 'rb') as filepath:
+        notes = pickle.load(filepath)
 
     return notes
 
@@ -95,7 +82,7 @@ def setup_model(network_input, n_note):
 
 def train(model, network_input, network_output):
     """ train the neural network """
-    filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
+    filepath = "models/weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
     checkpoint = ModelCheckpoint(
         filepath,
         monitor='loss',
